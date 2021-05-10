@@ -1,15 +1,25 @@
 var gui = new dat.GUI();
 var params = {
     Download_Image: function () { return save(); },
+    i: 0,
+    j: 0,
+    a: 0,
+    t: 0,
 };
 gui.add(params, "Download_Image");
+gui.add(params, "i", 0, 511, 1);
+gui.add(params, "j", 0, 511, 1);
+gui.add(params, "a", 0, 5, 0.001);
+gui.add(params, "t", 0, 1, 0.1);
 var rainbow;
 var z = [];
 var evol = 0;
 var alea = 0;
+var a = 1;
+var i = 0;
 var ai = new rw.HostedModel({
-    url: "https://fashion-illustrations-5e1ed0b0.hosted-models.runwayml.cloud/v1/",
-    token: "Y+i486Z+D1DO9jEAFibcyA==",
+    url: "https://fashion-illustrations-d4f1e2ab.hosted-models.runwayml.cloud/v1/",
+    token: "E7MFZQFcsEGWSebBblGQNg==",
 });
 var img;
 function draw() {
@@ -25,48 +35,37 @@ function newRainbowAlea() {
     newRainbow();
 }
 function newRainbow() {
-    for (var i = 0; i < 512; i++) {
-        z[i] = random(-1, 1);
+    for (var i_1 = 0; i_1 < 512; i_1++) {
+        z[i_1] = random(-1, 1);
     }
     evol = 1;
-    if (alea)
-        loopRainbowAlea();
-    else
-        loopRainbow();
+    loopRainbow();
 }
 function loopRainbow() {
     var inputs = {
         "z": z,
-        "truncation": 0.8
+        "truncation": params.t,
     };
+    a += 1.5;
+    if (a > 10) {
+        a = 1;
+        i += 1;
+    }
     ai.query(inputs).then(function (outputs) {
         gotImage(outputs);
-        z[0] += 0.5;
+        z[i] = a;
         if (evol)
             loopRainbow();
     });
 }
-function loopRainbowAlea() {
-    var inputs = {
-        "z": z,
-        "truncation": 0.8
-    };
-    ai.query(inputs).then(function (outputs) {
-        gotImage(outputs);
-        z[0] += random(-1, 1);
-        if (evol)
-            loopRainbow();
-    });
-}
-function stop() {
+function stopLoop() {
     evol = 0;
     alea = 0;
 }
 function setup() {
     p6_CreateCanvas();
-    createButton('start_lineaire').mousePressed(newRainbow);
-    createButton('start_aleatoire').mousePressed(newRainbowAlea);
-    createButton('stop').mousePressed(stop);
+    createButton('start').mousePressed(newRainbow);
+    createButton('stop').mousePressed(stopLoop);
 }
 function windowResized() {
     p6_ResizeCanvas();

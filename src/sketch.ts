@@ -5,23 +5,32 @@
 const gui = new dat.GUI()
 const params = {
     Download_Image: () => save(),
+    i:0,
+    j:0,
+    a:0,
+    t:0,
 }
 gui.add(params, "Download_Image")
+gui.add(params, "i", 0, 511, 1)
+gui.add(params, "j", 0, 511, 1)
+gui.add(params, "a", 0, 5, 0.001)
+gui.add(params, "t", 0, 1, 0.1)
 
 let rainbow;
 const z = [];
 let evol = 0;
 let alea = 0;
+let a = 1;
+let i = 0; 
+
 
 // You need to change this and use the values given to you by Runway for your own model
 const ai = new rw.HostedModel({
-    url: "https://fashion-illustrations-5e1ed0b0.hosted-models.runwayml.cloud/v1/",
-    token: "Y+i486Z+D1DO9jEAFibcyA==",
-  });
+   url: "https://fashion-illustrations-d4f1e2ab.hosted-models.runwayml.cloud/v1/",
+  token: "E7MFZQFcsEGWSebBblGQNg==",
+});
 
 let img: p5.Element
-//// You can use the info() method to see what type of input object the model expects
-// model.info().then(info => console.log(info));
 
 // -------------------
 //       Drawing
@@ -48,41 +57,31 @@ function newRainbow(){
     }
     
     evol = 1;
-    if (alea)
-        loopRainbowAlea();
-    else 
-        loopRainbow();
+     
+    loopRainbow();
 }
 
 function loopRainbow(){
     const inputs = {
         "z": z,
-        "truncation": 0.8
+        "truncation": params.t,
     };
+
+    a+= 1.5;
+    if (a > 10){
+        a = 1;
+        i += 1;
+    }
 
     ai.query(inputs).then(outputs => {
         gotImage(outputs)
-        z[0] +=0.5
+        z[i] = a
         if (evol)
             loopRainbow()
     });
 }
 
-function loopRainbowAlea(){
-    const inputs = {
-        "z": z,
-        "truncation": 0.8
-    };
-
-    ai.query(inputs).then(outputs => {
-        gotImage(outputs)
-        z[0] += random(-1,1)
-        if (evol)
-            loopRainbow()
-    });
-}
-
-function stop(){
+function stopLoop(){
     evol = 0;
     alea = 0;
 }
@@ -93,9 +92,8 @@ function stop(){
 
 function setup() {
     p6_CreateCanvas()
-    createButton('start_lineaire').mousePressed(newRainbow)
-    createButton('start_aleatoire').mousePressed(newRainbowAlea)
-    createButton('stop').mousePressed(stop)
+    createButton('start').mousePressed(newRainbow)
+    createButton('stop').mousePressed(stopLoop)
 }
 
 function windowResized() {
