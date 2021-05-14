@@ -16,8 +16,10 @@ gui.add(params, "j", 0, 511, 1)
 gui.add(params, "a", 0, 5, 0.001)
 gui.add(params, "t", 0, 1, 0.1)
 
-let rainbow;
+let illustration;
 const z = [];
+let nbFrame = 0
+const NB_FRAMES_TO_EXPORT = 120
 let evol = 0;
 let alea = 0;
 let a = 1;
@@ -37,31 +39,31 @@ let img: p5.Element
 // -------------------
 
 function draw() {
-    if (rainbow)
-        image(rainbow, 0, 0, width, height)
+    if (illustration)
+        image(illustration, 0, 0, width, height)
 }
 
 function gotImage(result){
-    rainbow = createImg(result.image)
-    rainbow.hide()
+    illustration = createImg(result.image)
+    illustration.hide()
 }
 
-function newRainbowAlea(){
+function newIllustrationAlea(){
     alea=1;
-    newRainbow();
+    newIllustration();
 }
 
-function newRainbow(){
+function newIllustration(){
     for (let i=0; i<512; i++){
         z[i] = random(-1,1)
     }
     
     evol = 1;
      
-    loopRainbow();
+    loopIllustration();
 }
 
-function loopRainbow(){
+function loopIllustration(){
     const inputs = {
         "z": z,
         "truncation": params.t,
@@ -76,8 +78,10 @@ function loopRainbow(){
     ai.query(inputs).then(outputs => {
         gotImage(outputs)
         z[i] = a
-        if (evol)
-            loopRainbow()
+        p5.prototype.downloadFile(outputs, nbFrame.toString(), "png")
+        nbFrame++
+        if (evol && nbFrame < NB_FRAMES_TO_EXPORT)
+            loopIllustration()
     });
 }
 
@@ -92,7 +96,7 @@ function stopLoop(){
 
 function setup() {
     p6_CreateCanvas()
-    createButton('start').mousePressed(newRainbow)
+    createButton('start').mousePressed(newIllustration)
     createButton('stop').mousePressed(stopLoop)
 }
 
