@@ -56,7 +56,7 @@ function loopIllustration() {
     ai.query(inputs).then(function (outputs) {
         gotImage(outputs);
         z[i] = a;
-        p5.prototype.downloadFile(outputs, nbFrame.toString(), "png");
+        p5.prototype.downloadFile(illustration, nbFrame.toString(), "png");
         nbFrame++;
         if (evol && nbFrame < NB_FRAMES_TO_EXPORT)
             loopIllustration();
