@@ -16,8 +16,8 @@ gui.add(params, "j", 0, 511, 1)
 gui.add(params, "a", 0, 5, 0.001)
 gui.add(params, "t", 0, 1, 0.1)
 
-let illustration;
-const z = [];
+let illustration
+const z = []
 let nbFrame = 0
 const NB_FRAMES_TO_EXPORT = 120
 let evol = 0;
@@ -76,10 +76,11 @@ function loopIllustration(){
     }
 
     ai.query(inputs).then(outputs => {
+        const { image } = outputs
         gotImage(outputs)
         z[i] = a
-        p5.prototype.downloadFile(illustration, nbFrame.toString(), "png")
-        nbFrame++
+        //p5.prototype.downloadFile(image , nbFrame.toString(), "png")
+        //nbFrame++
         if (evol && nbFrame < NB_FRAMES_TO_EXPORT)
             loopIllustration()
     });
