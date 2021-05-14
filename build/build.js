@@ -2,22 +2,20 @@ var gui = new dat.GUI();
 var params = {
     Download_Image: function () { return save(); },
     i: 0,
-    j: 0,
     a: 0,
     t: 0,
 };
 gui.add(params, "Download_Image");
 gui.add(params, "i", 0, 511, 1);
-gui.add(params, "j", 0, 511, 1);
 gui.add(params, "a", 0, 5, 0.001);
 gui.add(params, "t", 0, 1, 0.1);
 var illustration;
 var z = [];
 var nbFrame = 0;
-var NB_FRAMES_TO_EXPORT = 120;
+var NB_FRAMES_TO_EXPORT = 10;
 var evol = 0;
 var alea = 0;
-var a = 1;
+var a = 0.0;
 var i = 0;
 var ai = new rw.HostedModel({
     url: "https://fashion-illustrations-d4f1e2ab.hosted-models.runwayml.cloud/v1/",
@@ -32,13 +30,20 @@ function gotImage(result) {
     illustration = createImg(result.image);
     illustration.hide();
 }
-function newIllustrationAlea() {
-    alea = 1;
-    newIllustration();
-}
 function newIllustration() {
+    a = params.a;
     for (var i_1 = 0; i_1 < 512; i_1++) {
-        z[i_1] = random(-1, 1);
+        if (a > 1.0)
+            a = 0.0;
+        z[i_1] = a;
+        a += 0.02;
+    }
+    evol = 1;
+    loopIllustration();
+}
+function newIllustrationAlea() {
+    for (var i_2 = 0; i_2 < 512; i_2++) {
+        z[i_2] = random(-1, 1);
     }
     evol = 1;
     loopIllustration();
@@ -48,15 +53,16 @@ function loopIllustration() {
         "z": z,
         "truncation": params.t,
     };
-    a += 1.5;
-    if (a > 10) {
-        a = 1;
-        i += 1;
-    }
     ai.query(inputs).then(function (outputs) {
         var image = outputs.image;
         gotImage(outputs);
-        z[i] = a;
+        for (var i_3 = 0; i_3 < 512; i_3++) {
+            if (z[i_3] + 0.01 > 1.0)
+                z[i_3] = 0.0;
+            else
+                z[i_3] += 0.01;
+        }
+        console.log(z[0]);
         if (evol && nbFrame < NB_FRAMES_TO_EXPORT)
             loopIllustration();
     });
@@ -67,7 +73,8 @@ function stopLoop() {
 }
 function setup() {
     p6_CreateCanvas();
-    createButton('start').mousePressed(newIllustration);
+    createButton('generate').mousePressed(newIllustration);
+    createButton('start').mousePressed(newIllustrationAlea);
     createButton('stop').mousePressed(stopLoop);
 }
 function windowResized() {

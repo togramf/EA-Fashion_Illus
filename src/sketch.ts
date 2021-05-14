@@ -6,23 +6,21 @@ const gui = new dat.GUI()
 const params = {
     Download_Image: () => save(),
     i:0,
-    j:0,
     a:0,
     t:0,
 }
 gui.add(params, "Download_Image")
 gui.add(params, "i", 0, 511, 1)
-gui.add(params, "j", 0, 511, 1)
 gui.add(params, "a", 0, 5, 0.001)
 gui.add(params, "t", 0, 1, 0.1)
 
 let illustration
 const z = []
 let nbFrame = 0
-const NB_FRAMES_TO_EXPORT = 120
+const NB_FRAMES_TO_EXPORT = 10
 let evol = 0;
 let alea = 0;
-let a = 1;
+let a = 0.0;
 let i = 0; 
 
 
@@ -48,20 +46,31 @@ function gotImage(result){
     illustration.hide()
 }
 
-function newIllustrationAlea(){
-    alea=1;
-    newIllustration();
+function newIllustration(){
+    a = params.a
+    for (let i=0; i<512; i++){
+        if (a > 1.0)
+            a = 0.0
+        z[i] = a
+        a+=0.02
+    }
+    
+    evol = 1
+     
+    loopIllustration();
 }
 
-function newIllustration(){
+
+function newIllustrationAlea(){
     for (let i=0; i<512; i++){
         z[i] = random(-1,1)
     }
-    
+
     evol = 1;
      
     loopIllustration();
 }
+
 
 function loopIllustration(){
     const inputs = {
@@ -69,16 +78,17 @@ function loopIllustration(){
         "truncation": params.t,
     };
 
-    a+= 1.5;
-    if (a > 10){
-        a = 1;
-        i += 1;
-    }
 
     ai.query(inputs).then(outputs => {
         const { image } = outputs
         gotImage(outputs)
-        z[i] = a
+        for (let i = 0; i<512; i++){
+            if (z[i]+0.01 > 1.0)
+                z[i]=0.0
+            else 
+                z[i] += 0.01
+        }
+        console.log(z[0])
         //p5.prototype.downloadFile(image , nbFrame.toString(), "png")
         //nbFrame++
         if (evol && nbFrame < NB_FRAMES_TO_EXPORT)
@@ -97,7 +107,8 @@ function stopLoop(){
 
 function setup() {
     p6_CreateCanvas()
-    createButton('start').mousePressed(newIllustration)
+    createButton('generate').mousePressed(newIllustration)
+    createButton('start').mousePressed(newIllustrationAlea)
     createButton('stop').mousePressed(stopLoop)
 }
 
