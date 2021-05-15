@@ -12,7 +12,7 @@ gui.add(params, "t", 0, 1, 0.1);
 var illustration;
 var z = [];
 var nbFrame = 0;
-var NB_FRAMES_TO_EXPORT = 10;
+var NB_FRAMES_TO_EXPORT = 120;
 var evol = 0;
 var alea = 0;
 var a = 0.0;

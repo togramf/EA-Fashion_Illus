@@ -17,7 +17,7 @@ gui.add(params, "t", 0, 1, 0.1)
 let illustration
 const z = []
 let nbFrame = 0
-const NB_FRAMES_TO_EXPORT = 10
+const NB_FRAMES_TO_EXPORT = 120
 let evol = 0;
 let alea = 0;
 let a = 0.0;
