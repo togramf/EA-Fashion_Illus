@@ -4,7 +4,6 @@ var params = {
     train_function: 0,
     wave_function: 0,
     jump_function: 0,
-    circle_function: 0,
     linear_function: 0,
     random_function: 0,
     i: 0,
@@ -15,7 +14,6 @@ gui.add(params, "Download_Image");
 gui.add(params, "train_function", 0, 1, 1);
 gui.add(params, "wave_function", 0, 1, 1);
 gui.add(params, "jump_function", 0, 1, 1);
-gui.add(params, "circle_function", 0, 1, 1);
 gui.add(params, "linear_function", 0, 1, 1);
 gui.add(params, "random_function", 0, 1, 1);
 gui.add(params, "i", 0, 511, 1);
@@ -48,8 +46,6 @@ function progression(debut) {
         waveProgression(debut);
     else if (params.jump_function > 0)
         jumpProgression(debut);
-    else if (params.circle_function > 0)
-        circleProgression(debut);
     else if (params.linear_function > 0)
         linearProgression(debut);
     else
@@ -92,11 +88,6 @@ function jumpProgression(debut) {
         pos += jump;
     }
 }
-function circleProgression(debut) {
-    var angle = (2 * Math.PI * debut - Math.PI) / 511;
-    z[params.i] = cos(angle) * cos(angle);
-    console.log(params.i + " " + z[params.i] + " " + angle);
-}
 function linearProgression(debut) {
     if (z[params.i] + 0.15 > 1.0)
         z[params.i] = 0.0;
@@ -132,8 +123,6 @@ function loopIllustration() {
         gotImage(outputs);
         debut += 1;
         progression(debut);
-        p5.prototype.downloadFile(image, nbFrame.toString(), "png");
-        nbFrame++;
         if (evol && nbFrame < NB_FRAMES_TO_EXPORT)
             loopIllustration();
     });
