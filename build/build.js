@@ -1,13 +1,17 @@
 var gui = new dat.GUI();
 var params = {
     Download_Image: function () { return save(); },
+    train_function: 0,
+    wave_function: 0,
     i: 0,
     a: 0,
     t: 0,
 };
 gui.add(params, "Download_Image");
+gui.add(params, "train_function", 0, 1, 1);
+gui.add(params, "wave_function", 0, 1, 1);
 gui.add(params, "i", 0, 511, 1);
-gui.add(params, "a", 0, 5, 0.001);
+gui.add(params, "a", 0, 1, 0.1);
 gui.add(params, "t", 0, 1, 0.1);
 var illustration;
 var z = [];
@@ -15,8 +19,7 @@ var nbFrame = 0;
 var NB_FRAMES_TO_EXPORT = 120;
 var evol = 0;
 var alea = 0;
-var a = 0.0;
-var i = 0;
+var debut = 0;
 var ai = new rw.HostedModel({
     url: "https://fashion-illustrations-d4f1e2ab.hosted-models.runwayml.cloud/v1/",
     token: "E7MFZQFcsEGWSebBblGQNg==",
@@ -30,20 +33,51 @@ function gotImage(result) {
     illustration = createImg(result.image);
     illustration.hide();
 }
-function newIllustration() {
-    a = params.a;
-    for (var i_1 = 0; i_1 < 512; i_1++) {
-        if (a > 1.0)
-            a = 0.0;
-        z[i_1] = a;
-        a += 0.02;
+function progression(debut) {
+    if (params.train_function > 1)
+        trainProgression(debut);
+    else if (params.wave_function > 1)
+        waveProgression(debut);
+}
+function trainProgression(debut) {
+    var fin = debut + 10;
+    if (fin >= 512)
+        fin -= 511;
+    var val = params.a;
+    for (var i = 0; i < 512; i++) {
+        if ((debut < fin && (i >= debut && i <= fin)) || (debut > fin && (i >= debut || i <= fin))) {
+            val += 0.1;
+            if (val > 1)
+                val = 0;
+            z[i] = val;
+        }
     }
+}
+function waveProgression(debut) {
+    var size = 2 * (1.0 - params.a);
+    var pos = debut;
+    var incr = 0.1;
+    for (var i = 0; i < size; i++) {
+        if (z[pos] + incr > 1.0)
+            incr = -0.1;
+        if (pos >= 512)
+            pos = 0;
+        z[pos] += incr;
+        pos++;
+    }
+}
+function newIllustration() {
+    debut = params.i;
+    for (var i = 0; i < 512; i++) {
+        z[i] = params.a;
+    }
+    progression(debut);
     evol = 1;
     loopIllustration();
 }
 function newIllustrationAlea() {
-    for (var i_2 = 0; i_2 < 512; i_2++) {
-        z[i_2] = random(-1, 1);
+    for (var i = 0; i < 512; i++) {
+        z[i] = random(-1, 1);
     }
     evol = 1;
     loopIllustration();
@@ -56,13 +90,11 @@ function loopIllustration() {
     ai.query(inputs).then(function (outputs) {
         var image = outputs.image;
         gotImage(outputs);
-        for (var i_3 = 0; i_3 < 512; i_3++) {
-            if (z[i_3] + 0.01 > 1.0)
-                z[i_3] = 0.0;
-            else
-                z[i_3] += 0.01;
-        }
-        console.log(z[0]);
+        debut += 1;
+        if (debut >= 512)
+            debut = 0;
+        progression(debut);
+        console.log(z[debut] + " " + debut + " " + z[debut + 1] + " " + debut + 1);
         if (evol && nbFrame < NB_FRAMES_TO_EXPORT)
             loopIllustration();
     });
