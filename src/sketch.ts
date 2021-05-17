@@ -32,6 +32,9 @@ let evol = 0;
 let alea = 0;
 let debut = 0;
 
+// -------------------
+//      Runwayml
+// -------------------
 
 // You need to change this and use the values given to you by Runway for your own model
 const ai = new rw.HostedModel({
@@ -54,6 +57,10 @@ function gotImage(result){
     illustration = createImg(result.image)
     illustration.hide()
 }
+
+// -------------------
+//  Progression functions
+// -------------------
 
 function progression(debut){
     if (params.train_function > 0)
